@@ -1,0 +1,284 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Coffeebreak Phone</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#ff4fa3">
+<link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="CB Phone">
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#1a0a12;color:#fff;font:16px system-ui,-apple-system,Segoe UI,sans-serif;overscroll-behavior:none}
+button{font:inherit;cursor:pointer;border:0;color:inherit}input{font:inherit}
+#app{display:flex;flex-direction:column;height:100%;height:100dvh;max-width:100%}
+header{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) 14px 8px;background:#2a0f1e;border-bottom:1px solid #4a1c35}
+header img{width:40px;height:40px;border-radius:10px}header .t{flex:1}header b{display:block;color:#ff8cc6}header small{color:#d9a9c3}
+#oops{display:none;background:#ff4fa3;color:#1a0a12;padding:8px;text-align:center;font-weight:700}
+.main{flex:1;display:flex;min-height:0}
+#side{display:flex;flex-direction:column;flex:1;min-height:0}
+.panel{display:none;flex:1;overflow:auto;padding:14px}.panel.on{display:block}
+nav.tabs{display:flex;background:#2a0f1e;border-top:1px solid #4a1c35;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;background:none;padding:10px 0 8px;font-size:12px;color:#d9a9c3}nav.tabs button span{display:block;font-size:22px}nav.tabs button.on{color:#ff8cc6}
+#detail{display:none}body.incall #detail{display:block}
+.num{font-size:34px;text-align:center;min-height:48px;letter-spacing:2px;word-break:break-all}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:330px;margin:10px auto}
+.pad button{aspect-ratio:1;border-radius:50%;background:#3a1529;font-size:30px;max-height:88px}.pad button small{display:block;font-size:10px;color:#d9a9c3}
+.pad button:active{background:#ff4fa3}
+.row{display:flex;gap:12px;justify-content:center;align-items:center;margin:10px 0}
+.call{background:#2ecc71;width:72px;height:72px;border-radius:50%;font-size:30px}.vid{background:#3a1529;width:56px;height:56px;border-radius:50%;font-size:22px}
+.end{background:#e74c3c}
+.btn{background:#ff4fa3;color:#1a0a12;padding:10px 16px;border-radius:12px;font-weight:700}.btn.g{background:#3a1529;color:#fff}
+.note{font-size:12px;color:#c99ab4;text-align:center;margin:8px}
+.li{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #3a1529}.li .x{flex:1}.li small{color:#c99ab4}.li button{background:#3a1529;border-radius:10px;padding:6px 10px}
+input.f{width:100%;padding:10px;border-radius:10px;border:1px solid #4a1c35;background:#120610;color:#fff;margin:4px 0}
+#callScr{position:fixed;inset:0;background:linear-gradient(#3a1529,#120610);display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 30px) 20px calc(env(safe-area-inset-bottom) + 30px);z-index:10}
+#callScr.on{display:flex}#callScr img.av{width:110px;height:110px;border-radius:50%;border:3px solid #ff4fa3}
+#cName{font-size:28px;margin-top:10px}#cState{color:#ff8cc6;margin-top:6px;text-align:center}
+#vids{position:relative;width:100%;flex:1;display:none;margin:10px 0}#vids.on{display:block}
+#rv{width:100%;height:100%;object-fit:cover;border-radius:16px;background:#000}#lv{position:absolute;right:8px;bottom:8px;width:28%;border-radius:10px;background:#000}
+.cb{display:grid;grid-template-columns:repeat(3,72px);gap:16px}.cb button{width:72px;height:72px;border-radius:50%;background:#3a1529;font-size:24px}.cb button.act{background:#ff4fa3}.cb button small{display:block;font-size:10px}
+#offline{display:none;background:#2a0f1e;border:1px solid #ff4fa3;border-radius:14px;padding:12px;margin:10px 0;text-align:center}
+#chatBox{display:flex;flex-direction:column;height:100%}#msgs{flex:1;overflow:auto;padding:6px}
+.m{max-width:75%;padding:8px 12px;border-radius:14px;margin:4px 0;background:#3a1529;word-wrap:break-word}.m.me{margin-left:auto;background:#ff4fa3;color:#1a0a12}
+#guest{display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;flex:1;padding:20px;text-align:center}
+@media (min-width:900px){body.incall #detail{display:flex}
+ .main{padding:0}#side{flex:0 0 360px;border-right:1px solid #4a1c35}
+ #detail{display:flex;flex:1;flex-direction:column;min-width:0;padding:20px;overflow:auto}
+ #callScr{position:static;flex:1;border-radius:0}
+ #callScr.on~#detailIdle{display:none}
+}
+.big{display:block;width:100%;margin:6px 0;padding:14px;font-size:17px}
+.az{position:sticky;top:0;background:#1a0a12;color:#ff8cc6;font-weight:700;padding:6px 4px;border-bottom:1px solid #4a1c35}
+.tag{display:inline-block;background:#2ecc71;color:#06210f;border-radius:8px;padding:1px 7px;font-size:12px;font-weight:700}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.acts a,.acts button{background:#3a1529;color:#fff;border-radius:10px;padding:10px 12px;text-decoration:none;font-size:15px}
+.acts .fr{background:#2ecc71;color:#06210f;font-weight:700}
+details.help{background:#2a0f1e;border-radius:12px;padding:8px 12px;margin:6px 0;font-size:14px;color:#e8c6d8}
+#sndBtn{display:none;position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:3}#cQ{font-size:13px;color:#ffd27a;min-height:16px}
+#vids:fullscreen{background:#000}#vids:fullscreen #rv{object-fit:contain;border-radius:0}
+a.sms{background:#0a84ff!important;color:#fff!important}
+iframe#nl-badge-frame{display:none!important}
+</style></head><body>
+<div id="app">
+<header><img src="logo.jpg" alt="Coffeebreak Games"><div class="t"><b>Coffeebreak Phone</b><small>Your number: <span id="myNum">...</span> <span id="net">connecting</span></small></div><a href="https://songwriterkaz.github.io/coffeebreak-support/" target="_blank" rel="noopener" class="btn g" style="text-decoration:none;min-height:40px;padding:8px 12px;font-size:14px" title="Support Coffeebreak">💖 Support</a><button class="btn g" id="openTab" style="display:none">Open in its own tab</button></header>
+<div id="oops"></div>
+<div class="main">
+<div id="side">
+ <div id="guest"><img src="logo.jpg" style="width:120px;border-radius:24px"><div style="font-size:22px"><span id="gWho"></span> is calling you on Coffeebreak Phone</div><div class="note">No app or sign-up needed. Tap below and allow the microphone.</div><button class="call" id="gCall">📞</button><button class="btn g" id="gVid">Join with video</button><div class="note" id="gNote"></div></div>
+ <section class="panel on" id="p-keypad">
+  <div class="num" id="dial"></div>
+  <div class="pad" id="pad"></div>
+  <div class="row"><button class="vid" id="vidCall" title="Video call">🎥</button><button class="call" id="callBtn" title="Call">📞</button><button class="vid" id="del" title="Delete">⌫</button></div>
+  <div id="telBox" style="display:none;margin:6px auto;max-width:360px"><a class="btn big" id="telBtn" style="text-align:center;text-decoration:none;background:#2ecc71;color:#06210f">📱 Call with my phone</a><a class="btn big sms" id="smsBtn" style="text-align:center;text-decoration:none">💬 Text with my phone</a><div class="note">Uses your phone plan</div><button class="btn g big" id="freeBtn">☕ Free Coffeebreak call</button></div>
+  <div id="offline"><div id="offTxt"></div><div class="row" style="flex-wrap:wrap"><button class="btn" id="sendSms">Send call link by text</button><button class="btn g" id="shareLink">Share call link</button><button class="btn g" id="copyLink">Copy link</button></div><div class="row"><input class="f" id="smsTo" placeholder="Their mobile number for the text"></div></div>
+  <div class="note">Type a Coffeebreak number for a free call, or any mobile or landline to call with your phone. Hold 0 for +.</div>
+ </section>
+ <section class="panel" id="p-recents"><h3>Recent calls</h3><div id="recents"></div></section>
+ <section class="panel" id="p-contacts"><h3>Contacts</h3>
+ <button class="btn big" id="syncC">📱 Sync phone contacts</button>
+ <label class="btn g big" style="text-align:center">📄 Import contacts file (.vcf)<input type="file" id="vcfIn" accept=".vcf,text/vcard,text/x-vcard" multiple hidden></label>
+ <details class="help"><summary>How to get a contacts file</summary>
+ <p><b>iPhone:</b> on a computer go to iCloud.com, open Contacts, select all, then choose Export vCard. Open this app on that computer and import the file.</p>
+ <p><b>Mac:</b> open Contacts, select all, then File, Export, Export vCard.</p>
+ <p><b>Android:</b> tap Sync phone contacts above in Chrome.</p></details>
+ <div class="note" id="syncNote"></div>
+ <input class="f" id="cSearch" placeholder="Search contacts" type="search">
+ <div id="contacts"></div>
+ <details class="help"><summary>Add a contact by hand</summary><input class="f" id="cN" placeholder="Name"><input class="f" id="cNum" placeholder="Mobile or CB-123456"><button class="btn" id="cAdd">Add contact</button></details>
+</section>
+<section class="panel" id="p-chats"><h3>Chats</h3><div id="chatList"></div><div class="note">Open a contact and tap Chat to start one.</div></section>
+ <section class="panel" id="p-me"><h3>My Coffeebreak number</h3><input class="f" id="meNum"><button class="btn" id="meSave">Save number</button><div class="note">Use your mobile number (like 0400 000 000) so friends who sync their contacts can find you and call you free.</div><p><button class="btn" id="invite">Invite someone to call me</button></p><div class="note" id="inviteNote"></div><div class="note">Calls go over WiFi or mobile data, phone to phone, computer to computer, or a mix. Calls to normal phone numbers need a paid calling service.</div></section>
+ <nav class="tabs" id="tabs"><button data-t="keypad" class="on"><span>⌨️</span>Keypad</button><button data-t="recents"><span>🕘</span>Recents</button><button data-t="contacts"><span>👥</span>Contacts</button><button data-t="chats"><span>💬</span>Chats</button><button data-t="me"><span>☕</span>Me</button></nav>
+</div>
+<div id="detail">
+ <div id="callScr">
+  <div style="text-align:center"><img class="av" src="logo.jpg"><div id="cName"></div><div id="cState"></div><div id="cTime"></div><div id="cQ"></div></div>
+  <div id="vids"><button class="btn" id="sndBtn">🔊 Tap to turn on sound</button><video id="rv" autoplay playsinline muted></video><video id="lv" autoplay playsinline muted></video></div>
+  <audio id="ra" autoplay playsinline></audio>
+  <div><div class="cb" id="inCtl"><button id="bMute"><span>🎤</span><small>Mute</small></button><button id="bSpk"><span>🔈</span><small>Speaker</small></button><button id="bCam"><span>🎥</span><small>Video</small></button><button id="bChat"><span>💬</span><small>Chat</small></button><button class="end" id="bEnd"><span>📞</span><small>End</small></button><button id="bFlip"><span>🔄</span><small>Flip camera</small></button><button id="bFull"><span>⛶</span><small>Full screen</small></button><button id="bPip"><span>🖼️</span><small>Pop out</small></button></div>
+  <div class="row" id="ringCtl" style="display:none;gap:40px"><button class="call end" id="bDecline">✖</button><button class="call" id="bAccept">📞</button><button class="vid" id="bAcceptV" title="Answer with video">🎥</button></div></div>
+ </div>
+ <div id="detailIdle" style="flex:1;display:flex;flex-direction:column;min-height:0"><div id="chatBox" style="display:none"><h3 id="chatWith"></h3><div id="msgs"></div><div class="row"><input class="f" id="msgIn" placeholder="Message"><button class="btn" id="msgSend">Send</button><button class="btn g" id="chatCall">📞</button><button class="btn g" id="chatVid" title="Video call">🎥</button><a class="btn sms" id="chatSms" style="text-decoration:none;display:none">💬 Text</a></div></div>
+ <div id="idleMsg" style="margin:auto;text-align:center"><img src="logo.jpg" style="width:160px;border-radius:30px;opacity:.9"><p>Pick a contact or dial a number.</p><p class="note">Keyboard: type digits, Backspace to delete, Enter to call.</p></div></div>
+</div>
+</div></div>
+<script src="peerjs.min.js"></script>
+<script>
+(function(){
+var CALL_URL=window.CB_CALL_URL||(/^https?:/.test(location.origin)?location.origin+location.pathname.replace(/[^\/]*$/,''):'https://coffeebreak-phone.netlify.app/');
+var PFX='coffeebreak-phone-',ICE={iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302','stun:stun2.l.google.com:19302']},{urls:'stun:stun.cloudflare.com:3478'},{urls:['stun:stun3.l.google.com:19302','stun:stun4.l.google.com:19302']}],iceCandidatePoolSize:4};
+var S=(function(){try{var s=window.localStorage;s.setItem('_t','1');s.removeItem('_t');return s}catch(e){var d={};return{getItem:function(k){return k in d?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]}}}})();
+function J(k,v){if(v===undefined){try{return JSON.parse(S.getItem('cbp_'+k))}catch(e){return null}}S.setItem('cbp_'+k,JSON.stringify(v))}
+var $=function(i){return document.getElementById(i)};
+function norm(n){n=String(n||'').toUpperCase().replace(/[^0-9A-Z]/g,'');if(n.indexOf('CB')===0)n=n.slice(2);if(/^0[2-9][0-9]{8}$/.test(n))n='61'+n.slice(1);else if(/^6106?[0-9]{8,9}$/.test(n))n='61'+n.replace(/^610?/,'');return n}
+function auNum(n){var d=String(n||'').replace(/[^0-9+]/g,'');if(d.indexOf('+')===0)d=d.slice(1);else if(d.indexOf('00')===0)d=d.slice(2);if(/^0[2-9][0-9]{8}$/.test(d))d='61'+d.slice(1);if(/^610[2-9][0-9]{8}$/.test(d))d='61'+d.slice(3);if(/^4[0-9]{8}$/.test(d))d='61'+d;return d}
+function telOf(r){r=String(r||'').trim();var plus=r.indexOf('+')===0,d=r.replace(/[^0-9]/g,'');if(!d)return null;if(plus||d.indexOf('00')===0){if(!plus)d=d.slice(2);if(/^610[2-9]/.test(d))d='61'+d.slice(3);return d.length>=8?'+'+d:null}
+ if(/^(13[0-9]{4}|1300[0-9]{6}|1800[0-9]{6})$/.test(d))return d;if(/^0[2-478][0-9]{8}$/.test(d))return '+61'+d.slice(1);if(/^61[2-478][0-9]{8}$/.test(d))return '+'+d;return null}
+window.CBtelOf=telOf;
+function showNum(d){if(/^1(3|300|800)/.test(d))return d;return /^61[0-9]{9}$/.test(d)?'0'+d.slice(2,5)+' '+d.slice(5,8)+' '+d.slice(8):/^[0-9]{8,}$/.test(d)?'+'+d:'CB-'+d}
+function fmt(d){return /^[0-9]{8,}$/.test(d)?showNum(d):'CB-'+d}
+var Q=new URLSearchParams(location.search),GUEST=Q.get('call')?norm(Q.get('call')):null;
+var me=J('num');if(!me){me=String(100000+Math.floor(Math.random()*900000));J('num',me)}
+var contacts=J('contacts')||[],recents=J('recents')||[],chats=J('chats')||{};
+function nameOf(d){var c=contacts.find(function(c){return c.num===d});return c?c.name:fmt(d)}
+var peer,cur=null,curConn=null,local=null,timer=null,t0=0,ringOsc=null,waitingFor=null,lastDial=null;
+var conns={},probing={},onCB=J('oncb')||{};
+function oops(m){$('oops').textContent=m;$('oops').style.display=m?'block':'none'}
+if(window.top!==window){$('openTab').style.display='';$('openTab').onclick=function(){window.open(CALL_URL+(GUEST?'?call='+fmt(GUEST):''),'_blank')}}
+function startPeer(){
+ if(peer)try{peer.destroy()}catch(e){}
+ var id=GUEST?PFX+'g'+Math.random().toString(36).slice(2,10):PFX+me;
+ $('myNum').textContent=GUEST?'guest':fmt(me);$('net').textContent='connecting';
+ peer=new Peer(id,{config:ICE,debug:0});
+ peer.on('open',function(){$('net').textContent='online';oops('');setTimeout(probeAll,1500)});
+ peer.on('disconnected',function(){$('net').textContent='reconnecting';setTimeout(function(){try{peer.reconnect()}catch(e){}},1500)});
+ peer.on('error',function(e){
+  if(e.type==='peer-unavailable'){var m=String(e.message).match(/coffeebreak-phone-([0-9a-z]+)/i);var who=m?m[1]:lastDial;if(m&&probing[who]){delete probing[who];return}
+   if(cur&&cur.__out){endUI(true)}showOffline(who)}
+  else if(e.type==='unavailable-id'){oops('That Coffeebreak number is already in use on another device. Pick a different one in Me.')}
+  else if(e.type==='network'||e.type==='server-error'||e.type==='socket-error'){$('net').textContent='offline';oops('Can\'t reach the call service. Check WiFi.')}
+ });
+ peer.on('call',onIncoming);
+ peer.on('connection',setupConn);
+}
+function setupConn(c){conns[c.peer]=c;c.on('data',function(d){var from=d.from||c.peer.replace(PFX,'');
+  if(d.t==='msg'){addMsg(from,{me:0,text:d.text,ts:Date.now()})}
+  if(d.t==='bye'&&cur&&cur.peer===c.peer)endUI()});}
+function getConn(d,cb){var pid=PFX+d,c=conns[pid];if(c&&c.open)return cb(c);c=peer.connect(pid,{reliable:true});setupConn(c);c.on('open',function(){cb(c)})}
+function media(video){return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:video?{facingMode:'user',width:{ideal:1280},height:{ideal:720},frameRate:{ideal:24,max:30}}:false})}
+function micErr(e){oops(window.top!==window?'The microphone is blocked in this window. Tap Open in its own tab.':'Allow the microphone to make calls ('+(e&&e.name||'error')+').')}
+function dial(d,video){d=norm(d);if(!d)return;lastDial=d;$('offline').style.display='none';
+ media(video).then(function(s){local=s;var c=peer.call(PFX+d,s,{metadata:{from:GUEST?null:me,video:!!video}});if(!c){showOffline(d);stopLocal();return}
+  c.__out=true;c.__num=d;bind(c);showCall(d,'Calling...',false);addRecent(d,'out');startTone('back')}).catch(micErr)}
+function onIncoming(c){var from=c.metadata&&c.metadata.from;c.__num=from||'guest';
+ if(cur){c.close();return}
+ cur=c;c.on('close',function(){if(cur===c)endUI()});
+ var label=from?nameOf(from):'Guest from your call link';
+ showCall(from,(waitingFor?'They opened your link, ':'')+'Incoming '+(c.metadata&&c.metadata.video?'video ':'')+'call',true,label);
+ addRecent(from||'guest','in');startTone('ring');waitingFor=null;$('offline').style.display='none';
+ if(window.Notification&&Notification.permission==='granted'&&document.hidden)try{new Notification('Coffeebreak Phone',{body:label+' is calling',icon:'icon-192.png'})}catch(e){}}
+function answer(video){var c=cur;stopTone();media(video).then(function(s){local=s;c.answer(s);bind(c);$('ringCtl').style.display='none';$('inCtl').style.display='';$('cState').textContent='Connecting...'}).catch(function(e){micErr(e);c.close();endUI()})}
+function bind(c){cur=c;
+ c.on('stream',function(rs){stopTone();$('ra').srcObject=rs;$('ra').play().catch(function(){$('sndBtn').style.display='block'});
+  if(rs.getVideoTracks().length){$('vids').classList.add('on');$('rv').muted=true;$('rv').srcObject=rs;$('rv').play().catch(function(){});$('lv').srcObject=local;$('lv').style.transform='scaleX(-1)'}qualityLoop(c);
+  $('cState').textContent='Connected';t0=Date.now();clearInterval(timer);timer=setInterval(tick,1000);tick();window.CB_STATE='connected'});
+ c.on('close',function(){if(cur===c)endUI()});
+ var watch=setInterval(function(){var pc=c.peerConnection;if(!pc)return;if(cur!==c){clearInterval(watch);return}
+  var s=pc.iceConnectionState;if(!t0)return;
+  if(s==='disconnected'||s==='failed'){if(!c.__lost){c.__lost=Date.now();$('cState').textContent='Reconnecting...';if(s==='failed'&&pc.restartIce)try{pc.restartIce()}catch(e){}}
+   else if(Date.now()-c.__lost>15000){clearInterval(watch);endUI()}}
+  else if(s==='closed'){clearInterval(watch);endUI()}
+  else if(c.__lost){c.__lost=0;$('cState').textContent='Connected'}},1000);}
+function tick(){var s=Math.floor((Date.now()-t0)/1000);$('cTime').textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2)}
+function showCall(d,state,ringing,label){document.body.classList.add('incall');$('callScr').classList.add('on');$('cName').textContent=label||(d?nameOf(d):'Guest');$('cState').textContent=state;$('cTime').textContent='';
+ $('ringCtl').style.display=ringing?'flex':'none';$('inCtl').style.display=ringing?'none':'';$('idleMsg').style.display='none';$('chatBox').style.display='none';window.CB_STATE=ringing?'ringing':'calling'}
+function hangup(){if(cur){var pid=cur.peer;try{if(conns[pid]&&conns[pid].open)conns[pid].send({t:'bye'});else if(!GUEST||true){var c=peer.connect(pid);c.on('open',function(){c.send({t:'bye'});setTimeout(function(){c.close()},500)})}}catch(e){}try{cur.close()}catch(e){}}endUI()}
+function stopLocal(){if(local)local.getTracks().forEach(function(t){t.stop()});local=null}
+function endUI(silent){stopTone();clearInterval(timer);if(cur&&t0){var r=recents[0];if(r)r.dur=Math.floor((Date.now()-t0)/1000);J('recents',recents);drawRecents()}
+ cur=null;t0=0;stopLocal();$('ra').srcObject=null;$('rv').srcObject=null;$('vids').classList.remove('on');
+ if(!silent){$('cState').textContent='Call ended';window.CB_STATE='ended'}setTimeout(function(){if(!cur){$('callScr').classList.remove('on');document.body.classList.remove('incall');$('idleMsg').style.display=''}},silent?0:1200);
+ ['bMute','bSpk','bCam'].forEach(function(b){$(b).classList.remove('act')})}
+var AC;function startTone(kind){stopTone();try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();AC.resume();var g=AC.createGain();g.gain.value=0;g.connect(AC.destination);var o=AC.createOscillator(),o2=AC.createOscillator();o.frequency.value=kind==='ring'?880:425;o2.frequency.value=kind==='ring'?660:450;o.connect(g);o2.connect(g);o.start();o2.start();var on=0,iv=setInterval(function(){on=!on;g.gain.value=on?(kind==='ring'?.15:.06):0},kind==='ring'?500:1000);ringOsc={o:o,o2:o2,iv:iv}}catch(e){}if(kind==='ring'&&navigator.vibrate)navigator.vibrate([400,200,400])}
+function stopTone(){if(ringOsc){clearInterval(ringOsc.iv);try{ringOsc.o.stop();ringOsc.o2.stop()}catch(e){}ringOsc=null}}
+function link(){return CALL_URL+'?call='+fmt(me)}
+function showOffline(d){waitingFor=d;var looksPhone=/^[0-9]{8,}$/.test(d||'');$('offline').style.display='block';
+ $('offTxt').textContent=(looksPhone?'That looks like a normal phone number. ':fmt(d)+' isn\'t online right now. ')+'Send them a free call link. When they open it, your phone rings here. Waiting for them to open the link...';
+ if(looksPhone)$('smsTo').value=d;window.CB_STATE='waiting-link'}
+function msgText(){return 'Call me free on Coffeebreak Phone, no app needed. Tap: '+link()}
+$('sendSms').onclick=function(){var to=$('smsTo').value.replace(/[^0-9+]/g,'');var sep=/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?';location.href='sms:'+to+sep+'body='+encodeURIComponent(msgText())};
+$('shareLink').onclick=$('invite').onclick=function(){if(navigator.share)navigator.share({title:'Coffeebreak Phone',text:msgText(),url:link()}).catch(function(){});else window.open('https://wa.me/?text='+encodeURIComponent(msgText()),'_blank');$('inviteNote').textContent=link()};
+$('copyLink').onclick=function(){(navigator.clipboard?navigator.clipboard.writeText(link()):Promise.reject()).then(function(){$('copyLink').textContent='Copied'},function(){prompt('Copy this link',link())})};
+function addRecent(d,dir){recents.unshift({num:d,dir:dir,ts:Date.now()});recents=recents.slice(0,50);J('recents',recents);drawRecents()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function drawRecents(){$('recents').innerHTML=recents.map(function(r){return '<div class="li"><div class="x">'+(r.dir==='in'?'↙ ':'↗ ')+esc(r.num==='guest'?'Guest':nameOf(r.num))+'<br><small>'+new Date(r.ts).toLocaleString()+(r.dur?' · '+Math.floor(r.dur/60)+'m '+r.dur%60+'s':'')+'</small></div>'+(r.num!=='guest'?'<button data-c="'+r.num+'">📞</button>':'')+'</div>'}).join('')||'<p class="note">No calls yet.</p>'}
+function isMe(n){return n===me}
+function drawContacts(){var q=($('cSearch').value||'').toLowerCase().trim(),qd=q.replace(/[^0-9]/g,''),L='',h='';
+ var list=contacts.map(function(c,i){return{c:c,i:i}}).filter(function(o){var c=o.c;if(isMe(c.num))return false;if(!q)return true;return c.name.toLowerCase().indexOf(q)>=0||(qd&&(c.num.indexOf(qd)>=0||(c.tel||'').replace(/[^0-9]/g,'').indexOf(qd)>=0))});
+ list.sort(function(a,b){return a.c.name.localeCompare(b.c.name,undefined,{sensitivity:'base'})});
+ list.forEach(function(o){var c=o.c,i=o.i,l=(c.name[0]||'#').toUpperCase();if(!/[A-Z]/.test(l))l='#';if(l!==L){L=l;h+='<div class="az">'+l+'</div>'}
+  var on=!!onCB[c.num],tel=telOf(/^1(3|300|800)/.test(c.num)?c.num:'+'+c.num)||'';
+  h+='<div class="li" data-cn="'+esc(c.num)+'"><div class="x">'+esc(c.name)+' '+(on?'<span class="tag">On Coffeebreak</span>':'')+'<br><small>'+esc(fmt(c.num))+'</small><div class="acts">'+
+  (on||!tel?'<button class="fr" data-c="'+c.num+'">📞 Free call</button><button class="fr" data-v="'+c.num+'">🎥 Video</button><button class="fr" data-m="'+c.num+'">💬 Message</button>':'')+
+  (tel?'<a href="tel:'+tel+'">📱 Call with my phone</a><a class="sms" href="'+smsHref(tel,on?'':msgText())+'">💬 Text</a>'+(on?'':'<button data-inv="'+c.num+'">✉️ Invite</button><button data-c="'+c.num+'">Try free call</button>'):'')+
+  '<button data-r="'+i+'" title="Remove">✖</button></div></div></div>'});
+ $('contacts').innerHTML=h||'<p class="note">'+(q?'No matches.':'No contacts yet. Tap Sync phone contacts or import a file.')+'</p>';
+ $('chatList').innerHTML=Object.keys(chats).map(function(d){var l=chats[d][chats[d].length-1];return '<div class="li"><div class="x">'+esc(nameOf(d))+'<br><small>'+esc(l?l.text:'')+'</small></div><button data-m="'+d+'">Open</button></div>'}).join('')}
+document.body.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var d=b.dataset;
+ if(d.c)dial(d.c);if(d.v)dial(d.v,true);if(d.m)openChat(d.m);if(d.inv)invite(d.inv);if(d.r){contacts.splice(+d.r,1);J('contacts',contacts);drawContacts()}
+ if(d.t){[].forEach.call($('tabs').children,function(x){x.classList.toggle('on',x===b)});[].forEach.call(document.querySelectorAll('.panel'),function(p){p.classList.toggle('on',p.id==='p-'+d.t)})}});
+$('cAdd').onclick=function(){var r=$('cNum').value,n=/[0-9]{8,}/.test(r.replace(/[^0-9]/g,''))&&!/CB/i.test(r)?auNum(r):norm(r);if(!n)return;merge([{name:$('cN').value||fmt(n),num:n}]);$('cN').value=$('cNum').value=''};
+$('cSearch').oninput=drawContacts;
+function merge(arr){var by={},added=0,upd=0;contacts.forEach(function(c){by[c.num]=c});
+ arr.forEach(function(c){if(!c.num||c.num.length<4)return;var x=by[c.num];if(x){if(c.name&&(x.name===fmt(x.num)||!x.name)&&c.name!==x.name){x.name=c.name;upd++}}else{c.name=c.name||fmt(c.num);contacts.push(c);by[c.num]=c;added++}});
+ J('contacts',contacts);drawContacts();probeAll();return{added:added,upd:upd}}
+function fromList(list){var out=[];list.forEach(function(p){var nm=(p.name||'').trim();(p.tel||[]).forEach(function(t){var n=auNum(t);if(n.length>=6&&n!==me)out.push({name:nm||showNum(n),num:n})})});return out}
+function report(r,total){$('syncNote').textContent='Found '+total+' numbers. Added '+r.added+' new'+(r.upd?', updated '+r.upd:'')+'. Saved on this device.'}
+function parseVCF(txt){txt=txt.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,'');var res=[];txt.split(/BEGIN:VCARD/i).slice(1).forEach(function(card){var fn='',n='',tels=[];
+ card.split(/\r?\n/).forEach(function(line){var i=line.indexOf(':');if(i<0)return;var k=line.slice(0,i).toUpperCase(),v=line.slice(i+1).trim();k=k.replace(/^ITEM[0-9]+\./,'');
+  if(/QUOTED-PRINTABLE/.test(k))try{v=decodeURIComponent(v.replace(/=([0-9A-F]{2})/gi,'%$1'))}catch(e){}
+  v=v.replace(/\\,/g,',').replace(/\\;/g,';');
+  if(/^FN[;:]?/.test(k)||k==='FN')fn=v;else if(/^N(;|$)/.test(k)){var p=v.split(';');n=[p[1],p[2],p[0]].filter(Boolean).join(' ').trim()}else if(/^TEL(;|$)/.test(k))tels.push(v.replace(/^tel:/i,''))});
+ res.push({name:fn||n,tel:tels})});return res}
+window.CBparseVCF=parseVCF;
+$('vcfIn').onchange=function(e){var fs=[].slice.call(e.target.files||[]),all=[],left=fs.length;if(!left)return;fs.forEach(function(f){var r=new FileReader();r.onload=function(){all=all.concat(fromList(parseVCF(String(r.result))));if(--left===0){report(merge(all),all.length);e.target.value=''}};r.readAsText(f)})};
+var CP=('contacts' in navigator)&&('ContactsManager' in window);
+if(!CP){$('syncC').textContent='📱 Sync phone contacts (Android Chrome)';}
+$('syncC').onclick=function(){if(!CP){$('syncNote').textContent='This browser can\'t read your phone contacts. On iPhone, Mac or a computer use Import contacts file below.';return}
+ navigator.contacts.select(['name','tel'],{multiple:true}).then(function(ps){var l=fromList(ps.map(function(p){return{name:(p.name||[])[0],tel:p.tel}}));report(merge(l),l.length)}).catch(function(){$('syncNote').textContent='Contacts not shared.'})};
+function invite(n){var t=msgText();if(navigator.share)navigator.share({title:'Coffeebreak Phone',text:t,url:link()}).catch(function(){});else location.href='sms:+'+n+(/iPhone|iPad|Mac/.test(navigator.userAgent)?'&':'?')+'body='+encodeURIComponent(t)}
+function probeAll(){if(!peer||!peer.open||GUEST)return;contacts.forEach(function(c,k){if(isMe(c.num)||probing[c.num])return;setTimeout(function(){probe(c.num)},k*120)})}
+function probe(n){probing[n]=1;try{var c=peer.connect(PFX+n,{metadata:{probe:1}});c.on('open',function(){delete probing[n];if(!onCB[n]){onCB[n]=Date.now();J('oncb',onCB);drawContacts()}setTimeout(function(){try{c.close()}catch(e){}},300)});setTimeout(function(){delete probing[n]},8000)}catch(e){}}
+window.CBtest={merge:merge,fromList:fromList,auNum:auNum,norm:norm,contacts:function(){return contacts},setOn:function(n){onCB[n]=1;drawContacts()}};
+var chatWith=null;function openChat(d){chatWith=d;$('chatWith').textContent='Chat with '+nameOf(d);$('idleMsg').style.display='none';$('chatBox').style.display='flex';
+ if(innerWidth<900){$('detail').style.cssText='display:flex;position:fixed;inset:0;background:#1a0a12;z-index:5;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 10px)';if(!$('chatBack')){var x=document.createElement('button');x.id='chatBack';x.className='btn g';x.textContent='Back';x.onclick=function(){$('detail').style.cssText='';$('chatBox').style.display='none'};$('chatBox').prepend(x)}}drawMsgs()}
+function drawMsgs(){if(!chatWith)return;$('msgs').innerHTML=(chats[chatWith]||[]).map(function(m){return '<div class="m'+(m.me?' me':'')+'">'+esc(m.text)+'</div>'}).join('');$('msgs').scrollTop=1e9}
+function addMsg(d,m){(chats[d]=chats[d]||[]).push(m);chats[d]=chats[d].slice(-200);J('chats',chats);drawMsgs();drawContacts();if(!m.me&&chatWith!==d&&innerWidth>=900)openChat(d)}
+$('msgSend').onclick=function(){var t=$('msgIn').value.trim();if(!t||!chatWith)return;var d=chatWith;$('msgIn').value='';getConn(d,function(c){c.send({t:'msg',text:t,from:me});addMsg(d,{me:1,text:t,ts:Date.now()})})};
+$('msgIn').onkeydown=function(e){if(e.key==='Enter')$('msgSend').click()};$('chatCall').onclick=function(){if(chatWith)dial(chatWith)};
+$('bChat').onclick=function(){if(cur&&cur.__num&&cur.__num!=='guest')openChat(cur.__num)};
+$('bMute').onclick=function(){if(!local)return;var on=$('bMute').classList.toggle('act');local.getAudioTracks().forEach(function(t){t.enabled=!on})};
+$('bSpk').onclick=function(){var on=$('bSpk').classList.toggle('act');var a=$('ra');a.volume=on?1:.6;if(a.setSinkId&&navigator.mediaDevices.enumerateDevices)navigator.mediaDevices.enumerateDevices().then(function(ds){var o=ds.filter(function(x){return x.kind==='audiooutput'});if(o.length>1)a.setSinkId(on?o[o.length-1].deviceId:'default').catch(function(){})})};
+$('bCam').onclick=function(){if(!cur||!local)return;var on=$('bCam').classList.toggle('act');var vt=local.getVideoTracks();
+ if(vt.length){vt.forEach(function(t){t.enabled=on});return}
+ if(on)navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(function(s){var t=s.getVideoTracks()[0];local.addTrack(t);$('lv').srcObject=local;$('vids').classList.add('on');var pc=cur.peerConnection;var snd=pc.getSenders().find(function(x){return x.track&&x.track.kind==='video'});if(snd)snd.replaceTrack(t);else{var tr=pc.getTransceivers().find(function(x){return x.receiver.track.kind==='video'&&/send/.test(x.currentDirection||x.direction||'')});if(tr&&tr.sender){tr.sender.replaceTrack(t)}else{var n=cur.__num;t.stop();if(n&&n!=='guest'){$('cState').textContent='Switching to a video call...';hangup();setTimeout(function(){dial(n,true)},1500)}else{$('cQ').textContent='Ask them to call you back with video.';$('bCam').classList.remove('act')}}}}).catch(function(){$('bCam').classList.remove('act');$('cQ').textContent='Allow the camera to use video.'})};
+$('bEnd').onclick=hangup;$('bAccept').onclick=function(){answer(false)};$('bAcceptV').onclick=function(){answer(true)};$('bDecline').onclick=function(){try{cur.close()}catch(e){}hangup()};
+// keypad
+var keys=[['1',''],['2','ABC'],['3','DEF'],['4','GHI'],['5','JKL'],['6','MNO'],['7','PQRS'],['8','TUV'],['9','WXYZ'],['*',''],['0','+'],['#','']];
+keys.forEach(function(k){var b=document.createElement('button');b.innerHTML=k[0]+'<small>'+(k[1]||'&nbsp;')+'</small>';b.onclick=function(){press(k[0])};$('pad').appendChild(b)});
+var dialStr='';function upd(){$('dial').textContent=dialStr;var t=telOf(dialStr);$('telBox').style.display=t?'block':'none';if(t)$('telBtn').href='tel:'+t}
+function press(k){if(k==='+'&&dialStr)return;if(dialStr.length<16)dialStr+=k;upd()}
+$('del').onclick=function(){dialStr=dialStr.slice(0,-1);upd()};$('freeBtn').onclick=function(){dial(dialStr)};
+(function(){var z=[].filter.call($('pad').children,function(b){return b.firstChild.textContent==='0'})[0],tm;z.addEventListener('pointerdown',function(){tm=setTimeout(function(){tm=0;if(!dialStr){dialStr='+';upd()}},600)});z.addEventListener('pointerup',function(){clearTimeout(tm)});z.onclick=function(){if(tm!==0)press('0');tm=null}})();
+$('callBtn').onclick=function(){dial(dialStr)};$('vidCall').onclick=function(){dial(dialStr,true)};
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT')return;if(cur&&e.key==='Escape'){hangup();return}
+ if(/^[0-9*#+]$/.test(e.key))press(e.key);else if(e.key==='Backspace')$('del').click();else if(e.key==='Enter'){if(cur&&$('ringCtl').style.display!=='none')answer(false);else if(!cur)dial(dialStr)}});
+$('meNum').value=fmt(me);$('meSave').onclick=function(){var raw=$('meNum').value,n=/^[+0-9 ()-]{8,}$/.test(raw.trim())?auNum(raw):norm(raw);if(n.length<4){oops('Use at least 4 digits or letters.');return}me=n;J('num',me);$('meNum').value=fmt(me);drawContacts();startPeer()};
+// guest
+if(GUEST){$('tabs').style.display='none';[].forEach.call(document.querySelectorAll('.panel'),function(p){p.classList.remove('on')});$('guest').style.display='flex';$('gWho').textContent=fmt(GUEST);
+ $('gCall').onclick=function(){dial(GUEST)};$('gVid').onclick=function(){dial(GUEST,true)}}
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});
+drawRecents();drawContacts();startPeer();
+var IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function smsHref(num,body){var t=num?(telOf(/^[0-9]{8,}$/.test(num)?'+'+num:num)||num):'';return 'sms:'+t+(body?(IOS||/Mac/.test(navigator.platform)?'&':'?')+'body='+encodeURIComponent(body):'')}
+window.CBsms=smsHref;
+var _upd=upd;upd=function(){_upd();var t=telOf(dialStr);if(t)$('smsBtn').href=smsHref(t,'')};
+var _oc=openChat;openChat=function(d){_oc(d);var ph=/^[0-9]{8,}$/.test(d)&&telOf('+'+d);$('chatSms').style.display=ph?'':'none';if(ph)$('chatSms').href=smsHref(d,onCB[d]?'':msgText())};
+$('chatVid').onclick=function(){if(chatWith)dial(chatWith,true)};
+function vSender(){var pc=cur&&cur.peerConnection;return pc&&pc.getSenders().find(function(x){return x.track&&x.track.kind==='video'})}
+var camFacing='user';
+$('bFlip').onclick=function(){var snd=vSender();if(!snd||!local){$('cQ').textContent='Turn on video first.';return}camFacing=camFacing==='user'?'environment':'user';
+ navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:camFacing},width:{ideal:1280},height:{ideal:720}}}).then(function(s){var t=s.getVideoTracks()[0];var old=local.getVideoTracks()[0];snd.replaceTrack(t);if(old){local.removeTrack(old);old.stop()}local.addTrack(t);$('lv').srcObject=local;$('lv').style.transform=camFacing==='user'?'scaleX(-1)':''}).catch(function(){camFacing=camFacing==='user'?'environment':'user';$('cQ').textContent='Could not switch camera.'})};
+$('bFull').onclick=function(){var v=$('vids'),rv=$('rv');if(!v.classList.contains('on')){$('cQ').textContent='Full screen works on video calls.';return}
+ if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return}
+ if(v.requestFullscreen)v.requestFullscreen().catch(function(){if(rv.webkitEnterFullscreen)rv.webkitEnterFullscreen()});else if(v.webkitRequestFullscreen)v.webkitRequestFullscreen();else if(rv.webkitEnterFullscreen)rv.webkitEnterFullscreen()};
+var pipOK=document.pictureInPictureEnabled||($('rv').webkitSupportsPresentationMode&&typeof $('rv').webkitSetPresentationMode==='function');if(!pipOK)$('bPip').style.display='none';
+$('bPip').onclick=function(){var rv=$('rv');if(!rv.srcObject){$('cQ').textContent='Pop out works on video calls.';return}if(document.pictureInPictureElement){document.exitPictureInPicture();return}if(rv.requestPictureInPicture)rv.requestPictureInPicture().catch(function(){});else if(rv.webkitSetPresentationMode)rv.webkitSetPresentationMode('picture-in-picture')};
+$('sndBtn').onclick=function(){unlockMedia();$('sndBtn').style.display='none'};
+function unlockMedia(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume()}catch(e){}
+ var ra=$('ra'),rv=$('rv');if(ra.srcObject&&ra.paused)ra.play().then(function(){$('sndBtn').style.display='none'}).catch(function(){});if(rv.srcObject&&rv.paused)rv.play().catch(function(){})}
+document.addEventListener('pointerdown',unlockMedia,true);document.addEventListener('touchend',unlockMedia,true);
+function qualityLoop(c){var last={},lvl=2;clearInterval(c.__q);c.__q=setInterval(function(){var pc=c.peerConnection;if(cur!==c||!pc){clearInterval(c.__q);return}
+ pc.getStats().then(function(st){var rtt=null,lost=0,recv=0,rl=0;st.forEach(function(r){if(r.type==='candidate-pair'&&r.nominated&&r.state==='succeeded'&&r.currentRoundTripTime!=null)rtt=r.currentRoundTripTime;if(r.type==='inbound-rtp'&&r.kind==='video'){lost+=r.packetsLost||0;recv+=r.packetsReceived||0}if(r.type==='remote-inbound-rtp'&&r.kind==='video'&&r.fractionLost!=null)rl=Math.max(rl,r.fractionLost)});
+  var dl=lost-(last.l||0),dr=recv-(last.r||0);last={l:lost,r:recv};var loss=dr+dl>0?dl/(dr+dl):0,bad=Math.max(loss,rl);
+  var n=bad>0.08||rtt>0.8?0:bad>0.03||rtt>0.4?1:2;if(n!==lvl){lvl=n;var snd=vSender();if(snd&&snd.getParameters){var p=snd.getParameters();if(!p.encodings||!p.encodings.length)p.encodings=[{}];p.encodings[0].maxBitrate=[250000,600000,1500000][n];p.encodings[0].scaleResolutionDownBy=[2,1.3,1][n];snd.setParameters(p).catch(function(){})}}
+  if(t0&&['connected','completed'].indexOf(pc.iceConnectionState)>=0)$('cQ').textContent=n===0?'Weak connection, lowering video quality to keep the call going':n===1?'Connection is a bit slow':''})},3000)}
+window.CB={openChat:function(d){openChat(d)},chats:function(){return chats},dial:dial,answer:answer,hangup:hangup,me:function(){return me},state:function(){return window.CB_STATE},link:link,peer:function(){return peer}};
+})();
+</script></body></html>
